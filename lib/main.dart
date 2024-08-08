@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:rflutter_alert/rflutter_alert.dart';
+
+import 'questionBank.dart';
 
 void main() => runApp(Quizzler());
 
@@ -25,6 +28,14 @@ class QuizPage extends StatefulWidget {
 }
 
 class _QuizPageState extends State<QuizPage> {
+  List<Icon> scoreKeeper = [];
+
+  QuestionBank questionBank = QuestionBank();
+
+  String buildQuestion() {
+    return questionBank.getQuestionText();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -37,7 +48,7 @@ class _QuizPageState extends State<QuizPage> {
             padding: EdgeInsets.all(10.0),
             child: Center(
               child: Text(
-                'This is where the question text will go.',
+                questionBank.getQuestionText(),
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 25.0,
@@ -54,7 +65,9 @@ class _QuizPageState extends State<QuizPage> {
               style: ButtonStyle(
                 backgroundColor: WidgetStateProperty.all<Color>(Colors.teal),
               ),
-              onPressed: () {},
+              onPressed: () {
+                checkAnswer(context, true);
+              },
               child: Text('True',
                   style: TextStyle(color: Colors.white, fontSize: 25)),
             ),
@@ -67,15 +80,44 @@ class _QuizPageState extends State<QuizPage> {
               style: ButtonStyle(
                 backgroundColor: WidgetStateProperty.all<Color>(Colors.red),
               ),
-              onPressed: () {},
+              onPressed: () {
+                checkAnswer(context, false);
+              },
               child: Text('False',
                   style: TextStyle(color: Colors.white, fontSize: 25)),
             ),
           ),
         ),
-        //TODO: Add a Row here as your score keeper
+        //Add a Row here as your score keeper
+        Row(children: scoreKeeper)
       ],
     );
+  }
+
+  void checkAnswer(BuildContext context, bool userPickedAnswer) {
+    if (questionBank.getQuestionText().contains('Quiz Ended')) {
+      _onBasicAlertPressed(context);
+      return;
+    }
+    bool correctAnswer = questionBank.getQuestionAnswer();
+    print('Used clicked false button & Correct Answer is => ${correctAnswer}');
+    if (userPickedAnswer == correctAnswer) {
+      scoreKeeper.add(Icon(Icons.check, color: Colors.green));
+    } else {
+      scoreKeeper.add(Icon(Icons.close, color: Colors.red));
+    }
+    setState(() {
+      questionBank.nextQuestion();
+    });
+  }
+
+  // The easiest way for creating RFlutter Alert
+  _onBasicAlertPressed(context) {
+    Alert(
+      context: context,
+      title: "QUIZ ENDED",
+      desc: "Flutter is more awesome with RFlutter Alert.",
+    ).show();
   }
 }
 
